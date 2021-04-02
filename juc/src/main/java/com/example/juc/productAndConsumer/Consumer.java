@@ -16,6 +16,7 @@ public class Consumer implements Runnable {
         this.queue = queue;
     }
 
+    @Override
     public void run( ) {
         System.out.println("start Consumer id=" + Thread.currentThread().getId());
         Random r = new Random();

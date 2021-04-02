@@ -9,6 +9,7 @@
         <module name="juc" />
         <module name="my-springmvc" />
         <module name="spring" />
+        <module name="zk" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -17,6 +18,7 @@
       <module name="my-springmvc" target="1.8" />
       <module name="spring" target="1.8" />
       <module name="study" target="1.5" />
+      <module name="zk" target="8" />
     </bytecodeTargetLevel>
   </component>
 </project>

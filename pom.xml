@@ -22,6 +22,7 @@
 		<module>juc</module>
 		<module>my-springmvc</module>
 		<module>spring</module>
+		<module>zk</module>
 	</modules>
 
 </project>

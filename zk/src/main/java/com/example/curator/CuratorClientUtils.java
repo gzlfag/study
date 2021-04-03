@@ -7,12 +7,11 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 
 public class CuratorClientUtils {
 
-    private static CuratorFramework curatorFramework;
     private final static String CONNECTSTRING = "localhost:2181";
 
 
     public static CuratorFramework getInstance( ) {
-        curatorFramework = CuratorFrameworkFactory.
+        CuratorFramework curatorFramework = CuratorFrameworkFactory.
                 newClient(CONNECTSTRING, 5000, 5000,
                         new ExponentialBackoffRetry(1000, 3));
         curatorFramework.start();

@@ -19,20 +19,17 @@ public class ZkClientApiOperatorDemo {
     public static void main(String[] args) throws InterruptedException {
         ZkClient zkClient = getInstance();
         //zkclient 提供递归创建父节点的功能
-       /* zkClient.createPersistent("/zkclient/zkclient1/zkclient1-1/zkclient1-1-1",true);
-        System.out.println("success");*/
-
-        //删除节点
-//        zkClient.deleteRecursive("/zkclient");
-
+        zkClient.createPersistent("/zkclient/zkclient1/zkclient1-1/zkclient1-1-1", true);
+        System.out.println("success");
 
         //获取子节点
-        List<String> list = zkClient.getChildren("/node");
+        List<String> list = zkClient.getChildren("/zkclient");
         System.out.println(list);
+        //递归删除
+//        zkClient.deleteRecursive("/zkclient");
 
         //watcher
-
-        zkClient.subscribeDataChanges("/node", new IZkDataListener() {
+        zkClient.subscribeDataChanges("/zkclient", new IZkDataListener() {
             @Override
             public void handleDataChange(String s, Object o) throws Exception {
                 System.out.println("节点名称：" + s + "->节点修改后的值" + o);
@@ -40,17 +37,17 @@ public class ZkClientApiOperatorDemo {
 
             @Override
             public void handleDataDeleted(String s) throws Exception {
-
+                System.out.println("删除");
             }
         });
 
-        zkClient.writeData("/node", "node");
+        zkClient.writeData("/zkclient", "node");
         TimeUnit.SECONDS.sleep(2);
 
-        zkClient.subscribeChildChanges("/node", new IZkChildListener() {
+        zkClient.subscribeChildChanges("/zkclient", new IZkChildListener() {
             @Override
             public void handleChildChange(String s, List<String> list) throws Exception {
-
+                System.out.println("子节点变更");
             }
         });
 

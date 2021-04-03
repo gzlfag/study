@@ -14,11 +14,12 @@ public class CuratorCreateSessionDemo {
                 newClient(CONNECTSTRING, 5000, 5000,
                         new ExponentialBackoffRetry(1000, 3));
         curatorFramework.start(); //start方法启动连接
+        System.out.println("success");
 
         //fluent风格
         CuratorFramework curatorFramework1 = CuratorFrameworkFactory.builder().connectString(CONNECTSTRING).sessionTimeoutMs(5000).
                 retryPolicy(new ExponentialBackoffRetry(1000, 3)).
-                namespace("/curator").build();
+                namespace("curator").build();
 
         curatorFramework1.start();
         System.out.println("success");

@@ -11,7 +11,10 @@ import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 public class DistributeLock {
 
@@ -37,14 +40,13 @@ public class DistributeLock {
     public boolean lock( ) {
         try {
             //LOCKS/00000001
-            lockID = zooKeeper.create(ROOT_LOCKS + "/", data, ZooDefs.Ids.
-                    OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
+            lockID = zooKeeper.create(ROOT_LOCKS + "/", data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL_SEQUENTIAL);
 
             System.out.println(Thread.currentThread().getName() + "->成功创建了lock节点[" + lockID + "], 开始去竞争锁");
 
             List<String> childrenNodes = zooKeeper.getChildren(ROOT_LOCKS, true);//获取根节点下的所有子节点
             //排序，从小到大
-            SortedSet<String> sortedSet = new TreeSet<String>();
+            SortedSet<String> sortedSet = new TreeSet<>();
             for (String children : childrenNodes) {
                 sortedSet.add(ROOT_LOCKS + "/" + children);
             }
@@ -63,9 +65,7 @@ public class DistributeLock {
                 System.out.println(Thread.currentThread().getName() + " 成功获取锁：[" + lockID + "]");
             }
             return true;
-        } catch (KeeperException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (KeeperException | InterruptedException e) {
             e.printStackTrace();
         }
         return false;
@@ -77,9 +77,7 @@ public class DistributeLock {
             zooKeeper.delete(lockID, -1);
             System.out.println("节点[" + lockID + "]成功被删除");
             return true;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (KeeperException e) {
+        } catch (InterruptedException | KeeperException e) {
             e.printStackTrace();
         }
         return false;
@@ -89,8 +87,9 @@ public class DistributeLock {
     public static void main(String[] args) {
         final CountDownLatch latch = new CountDownLatch(10);
         Random random = new Random();
+        ExecutorService executorService = newFixedThreadPool(10);
         for (int i = 0; i < 10; i++) {
-            new Thread(( ) -> {
+            executorService.execute(( ) -> {
                 DistributeLock lock = null;
                 try {
                     lock = new DistributeLock();
@@ -98,16 +97,15 @@ public class DistributeLock {
                     latch.await();
                     lock.lock();
                     Thread.sleep(random.nextInt(500));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 } finally {
                     if (lock != null) {
                         lock.unlock();
                     }
                 }
-            }).start();
+            });
         }
+        executorService.shutdown();
     }
 }

@@ -3,18 +3,16 @@ package com.example.zkclient;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.serialize.SerializableSerializer;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class MasterChooseTest {
 
-    private final static String CONNECTSTRING = "192.168.11.129:2181,192.168.11.134:2181," +
-            "192.168.11.135:2181,192.168.11.136:2181";
+    private final static String CONNECTSTRING = "localhost:2181";
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         List<MasterSelector> selectorLists = new ArrayList<>();
         try {
             for (int i = 0; i < 10; i++) {

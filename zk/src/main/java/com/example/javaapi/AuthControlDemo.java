@@ -23,27 +23,31 @@ public class AuthControlDemo implements Watcher {
         zookeeper = new ZooKeeper(CONNECTSTRING, 5000, new AuthControlDemo());
         countDownLatch.await();
 
-        ACL acl = new ACL(ZooDefs.Perms.CREATE, new Id("digest", "root:root"));
-        ACL acl2 = new ACL(ZooDefs.Perms.CREATE, new Id("ip", "192.168.1.1"));
+        try {
 
-        List<ACL> acls = new ArrayList<>();
-        acls.add(acl);
-        acls.add(acl2);
-        zookeeper.create("/auth1", "123".getBytes(), acls, CreateMode.PERSISTENT);
-        zookeeper.addAuthInfo("digest", "root:root".getBytes());
-        zookeeper.create("/auth1", "123".getBytes(), ZooDefs.Ids.CREATOR_ALL_ACL, CreateMode.PERSISTENT);
-        zookeeper.create("/auth1/auth1-1", "123".getBytes(), ZooDefs.Ids.CREATOR_ALL_ACL, CreateMode.EPHEMERAL);
+            ACL acl = new ACL(ZooDefs.Perms.CREATE, new Id("digest", "root:root"));
+            ACL acl2 = new ACL(ZooDefs.Perms.CREATE, new Id("ip", "127.0.0.1"));
 
+            List<ACL> acls = new ArrayList<>();
+            acls.add(acl);
+            acls.add(acl2);
+            zookeeper.create("/auth1", "123".getBytes(), acls, CreateMode.PERSISTENT);
+            zookeeper.addAuthInfo("digest", "root:root".getBytes());
+            zookeeper.create("/auth12", "123".getBytes(), ZooDefs.Ids.CREATOR_ALL_ACL, CreateMode.PERSISTENT);
+            zookeeper.create("/auth1/auth1-1", "123".getBytes(), ZooDefs.Ids.CREATOR_ALL_ACL, CreateMode.EPHEMERAL);
 
-        ZooKeeper zooKeeper1 = new ZooKeeper(CONNECTSTRING, 5000, new AuthControlDemo());
-        countDownLatch.await();
-        zooKeeper1.delete("/auth1", -1);
-
+        } finally {
+            ZooKeeper zooKeeper1 = new ZooKeeper(CONNECTSTRING, 5000, new AuthControlDemo());
+            countDownLatch.await();
+            zooKeeper1.delete("/auth1", -1);
+            zooKeeper1.delete("/auth12", -1);
+        }
         // acl (create /delete /admin /read/write)
         //权限模式： ip/Digest（username:password）/world/super
 
     }
 
+    @Override
     public void process(WatchedEvent watchedEvent) {
         //如果当前的连接状态是连接成功的，那么通过计数器去控制
         if (watchedEvent.getState() == Event.KeeperState.SyncConnected) {

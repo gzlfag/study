@@ -4,10 +4,14 @@ import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.exception.ZkNodeExistsException;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.concurrent.Executors.newScheduledThreadPool;
+
+/**
+ * 主节点的选举
+ */
 public class MasterSelector {
 
     private ZkClient zkClient;
@@ -22,7 +26,7 @@ public class MasterSelector {
 
     private boolean isRunning = false;
 
-    ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+    private ScheduledExecutorService scheduledExecutorService = newScheduledThreadPool(1);
 
     public MasterSelector(UserCenter server, ZkClient zkClient) {
         System.out.println("[" + server + "] 去争抢master权限");
@@ -76,10 +80,9 @@ public class MasterSelector {
             System.out.println(master + "->我现在已经是master，你们要听我的");
 
             //定时器
-            //master释放(master 出现故障）,没5秒钟释放一次
-            scheduledExecutorService.schedule(( ) -> {
-                releaseMaster();//释放锁
-            }, 2, TimeUnit.SECONDS);
+            //master释放(master 出现故障）,每5秒钟释放一次
+            //释放锁
+            scheduledExecutorService.schedule(this::releaseMaster, 2, TimeUnit.SECONDS);
         } catch (ZkNodeExistsException e) {
             //表示master已经存在
             UserCenter userCenter = zkClient.readData(MASTER_PATH, true);
